@@ -1,5 +1,6 @@
 require("dotenv").config();
 
+const express = require("express");
 const mysql = require("mysql");
 const connection = mysql.createConnection({
   host: process.env.HOST,
@@ -8,11 +9,22 @@ const connection = mysql.createConnection({
   database: process.env.DB,
 });
 
-connection.connect();
+const app = express();
 
-connection.query("SELECT * FROM Users", (errors, rows, fields) => {
-  if (errors) throw errors;
-  console.log("User info is: ", rows);
+app.set("port", process.env.PORT || 3000);
+
+app.get("/", (req, res) => {
+  res.send("Root");
 });
 
-connection.end();
+app.get("/users", (req, res) => {
+  connection.query("SELECT * from Users", (error, rows) => {
+    if (error) throw error;
+    console.log("User info is: ", rows);
+    res.send(rows);
+  });
+});
+
+app.listen(app.get("port"), () => {
+  console.log("listening on port: " + app.get("port"));
+});
